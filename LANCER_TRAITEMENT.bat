@@ -1,5 +1,5 @@
 @echo off
-title Traitement de Timbres
+title LTC Traitement Images
 cd /d "%~dp0"
 
 echo ==========================================

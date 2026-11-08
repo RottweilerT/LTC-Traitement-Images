@@ -1,7 +1,7 @@
 {
-  "name": "Traitement de Timbres",
-  "short_name": "Timbres",
-  "description": "Télécharger le logiciel Traitement de Timbres et suivre ses mises à jour.",
+  "name": "LTC Traitement Images",
+  "short_name": "LTC Images",
+  "description": "Télécharger le logiciel LTC Traitement Images et suivre ses mises à jour.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",

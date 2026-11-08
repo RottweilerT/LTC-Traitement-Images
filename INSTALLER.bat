@@ -71,9 +71,9 @@ if errorlevel 1 (
 ".venv\Scripts\python.exe" run_pipeline.py --version
 
 echo.
-echo Creation du raccourci "Traitement de Timbres" sur le Bureau ...
+echo Creation du raccourci "LTC Traitement Images" sur le Bureau ...
 set "PROJET=%~dp0"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$d=[Environment]::GetFolderPath('Desktop'); $s=(New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $d 'Traitement de Timbres.lnk')); $s.TargetPath=(Join-Path $env:PROJET 'LANCER_TRAITEMENT.bat'); $s.WorkingDirectory=$env:PROJET; $s.IconLocation=(Join-Path $env:PROJET 'ressources\icone.ico'); $s.Description='Traitement de Timbres'; $s.Save()"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$d=[Environment]::GetFolderPath('Desktop'); Remove-Item -LiteralPath (Join-Path $d 'LTC Traitement Images.lnk') -ErrorAction SilentlyContinue; $s=(New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $d 'LTC Traitement Images.lnk')); $s.TargetPath=(Join-Path $env:PROJET 'LANCER_TRAITEMENT.bat'); $s.WorkingDirectory=$env:PROJET; $s.IconLocation=(Join-Path $env:PROJET 'ressources\icone.ico'); $s.Description='LTC Traitement Images'; $s.Save()"
 if errorlevel 1 (
     echo Le raccourci n'a pas pu etre cree ^(sans consequence^) : lancez LANCER_TRAITEMENT.bat directement.
 ) else (

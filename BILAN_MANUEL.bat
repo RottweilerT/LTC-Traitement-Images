@@ -1,5 +1,5 @@
 @echo off
-title Traitement de Timbres - bilan manuel
+title LTC Traitement Images - bilan manuel
 cd /d "%~dp0"
 
 echo ==========================================
