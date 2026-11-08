@@ -112,6 +112,7 @@ Traitement-Images-LTC/
 ├── output/                 fichiers générés
 ├── image_pipeline/         modules du programme
 ├── tests/                  tests automatiques
+├── ressources/             icône Windows (logo Traitement de Timbres)
 ├── INSTALLER.bat           installation (une seule fois)
 ├── LANCER_TRAITEMENT.bat   traitement du dossier input
 ├── BILAN_MANUEL.bat        bilan du contrôle manuel
@@ -124,6 +125,10 @@ Les originaux placés dans `input` ne sont jamais écrasés.
 ## Installation
 
 Une seule fois : double-cliquer sur **`INSTALLER.bat`**.
+
+Il crée aussi sur le Bureau un raccourci **« Traitement de Timbres »**, avec le
+logo, qui lance le traitement. Si le dossier du logiciel est déplacé, relancer
+`INSTALLER.bat` met le raccourci à jour.
 
 Il crée dans le dossier du projet un environnement Python 3.12 (`.venv`) et y
 installe NumPy, Pillow, OpenCV et SciPy. Python 3.12 doit être installé

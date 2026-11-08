@@ -1,4 +1,5 @@
 @echo off
+title Traitement de Timbres - bilan manuel
 cd /d "%~dp0"
 
 echo ==========================================

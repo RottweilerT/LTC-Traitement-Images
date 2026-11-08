@@ -1,4 +1,5 @@
 @echo off
+title Traitement de Timbres
 cd /d "%~dp0"
 
 echo ==========================================

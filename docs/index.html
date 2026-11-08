@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Traitement d'images LTC</title>
+<title>Traitement de Timbres</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="description" content="Logiciel Windows qui détoure, redresse et encadre automatiquement les timbres et documents scannés sur fond gris.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,7 +17,7 @@
     --noir-sortie: #050002;  /* fond et marge des fichiers produits */
     --papier: #F4F3EE;       /* papier du timbre */
     --encre: #1A1C1A;        /* texte */
-    --outremer: #233F8F;     /* encre postale : liens et bouton */
+    --accent: #C8101B;       /* rouge du logo : liens et bouton */
     --discret: #5B5F5A;
     --filet: #BFC2BC;
   }
@@ -30,8 +32,8 @@
     font-size: 1.0625rem;
     line-height: 1.55;
   }
-  a { color: var(--outremer); text-underline-offset: 3px; }
-  a:focus-visible, button:focus-visible { outline: 3px solid var(--outremer); outline-offset: 3px; }
+  a { color: var(--accent); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 
   .page { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
 
@@ -55,7 +57,7 @@
 
   .telecharger {
     display: inline-block;
-    background: var(--outremer);
+    background: var(--accent);
     color: #fff;
     text-decoration: none;
     font-weight: 700;
@@ -63,31 +65,13 @@
     padding: 0.95rem 1.6rem;
     border-radius: 4px;
   }
-  .telecharger:hover { background: #1A3175; }
+  .telecharger:hover { background: #A00C15; }
   .version { margin: 0.9rem 0 0; color: var(--discret); font-size: 0.95rem; }
 
-  /* Scène du timbre : gris du scan qui devient noir de sortie */
-  .scene {
-    aspect-ratio: 1 / 1.08;
-    background: var(--gris-scan);
-    display: grid;
-    place-items: center;
-    border-radius: 2px;
-    animation: noircir 1.4s ease-in-out 0.6s forwards;
-  }
-  .scene svg {
-    width: 62%;
-    height: auto;
-    transform: rotate(-5deg);
-    animation: redresser 1.4s cubic-bezier(.5,0,.2,1) 0.6s forwards;
-  }
-  @keyframes redresser { to { transform: rotate(0deg); } }
-  @keyframes noircir { to { background: var(--noir-sortie); } }
-  .legende { margin: 0.6rem 0 0; font-size: 0.9rem; color: var(--discret); }
-
-  @media (prefers-reduced-motion: reduce) {
-    .scene { animation: none; background: var(--noir-sortie); }
-    .scene svg { animation: none; transform: none; }
+  .logo { margin: 0; justify-self: end; width: 100%; max-width: 26rem; }
+  .logo img {
+    display: block; width: 100%; height: auto;
+    filter: drop-shadow(0 18px 30px rgba(40, 0, 4, 0.28));
   }
 
   /* Sections */
@@ -118,7 +102,7 @@
     font-variation-settings: "wdth" 125;
     font-size: 1.6rem;
     line-height: 1.1;
-    color: var(--outremer);
+    color: var(--accent);
   }
   ol.etapes strong { display: block; }
   code {
@@ -147,6 +131,7 @@
 
   @media (max-width: 760px) {
     .tete { grid-template-columns: 1fr; gap: 2rem; padding: 2.5rem 0 2rem; }
+    .logo { justify-self: center; max-width: 18rem; }
     .colonnes { grid-template-columns: 1fr; gap: 1.25rem; }
     ul.journal li { grid-template-columns: 1fr; gap: 0.1rem; }
   }
@@ -157,29 +142,13 @@
 
   <header class="tete">
     <div>
-      <h1>Traitement d'images LTC</h1>
+      <h1>Traitement de Timbres</h1>
       <p class="accroche">Déposez vos scans de timbres et de documents : le logiciel les détoure, les redresse et les place sur un fond noir avec une marge de 1&nbsp;mm, sans toucher à leurs couleurs.</p>
       <a class="telecharger" id="lien-zip" href="https://github.com/RottweilerT/LTC-Traitement-Images/archive/refs/heads/main.zip">Télécharger le logiciel (.zip)</a>
       <p class="version" id="version">Toujours la dernière version, pour Windows.</p>
     </div>
-    <figure style="margin:0">
-      <div class="scene" role="img" aria-label="Un timbre posé de travers sur le fond gris d'un scan est redressé puis placé sur un fond noir">
-        <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <defs>
-            <mask id="dentelure">
-              <rect x="0" y="0" width="200" height="240" fill="#fff"/>
-              <g fill="#000" id="trous"></g>
-            </mask>
-          </defs>
-          <rect x="0" y="0" width="200" height="240" fill="#F4F3EE" mask="url(#dentelure)"/>
-          <rect x="18" y="18" width="164" height="204" fill="#233F8F"/>
-          <circle cx="100" cy="98" r="34" fill="none" stroke="#F4F3EE" stroke-width="5"/>
-          <path d="M18 168 C 60 140, 92 182, 140 152 S 182 150, 182 150 L182 222 L18 222 Z" fill="#1A3175"/>
-          <text x="30" y="210" fill="#F4F3EE" font-family="Archivo, sans-serif" font-weight="800" font-size="26" style="font-variation-settings:'wdth' 125">1 mm</text>
-          <text x="170" y="44" fill="#F4F3EE" font-family="Archivo, sans-serif" font-weight="700" font-size="13" text-anchor="end">LTC</text>
-        </svg>
-      </div>
-      <figcaption class="legende">Ce que fait le logiciel, scan par scan.</figcaption>
+    <figure class="logo">
+      <img src="logo.webp" width="512" height="512" alt="Logo Traitement de Timbres : un timbre dans un cadre de recadrage, avec les outils recadrer, redimensionner, image et réglages, et une loupe sur la dentelure">
     </figure>
   </header>
 
@@ -218,13 +187,6 @@
 
 <script>
 (() => {
-  // Dentelure du timbre : trous ronds réguliers sur les quatre bords.
-  const trous = document.getElementById("trous");
-  const ns = "http://www.w3.org/2000/svg";
-  const trou = (x, y) => { const c = document.createElementNS(ns, "circle"); c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", 4.2); trous.appendChild(c); };
-  for (let x = 0; x <= 200; x += 12.5) { trou(x, 0); trou(x, 240); }
-  for (let y = 0; y <= 240; y += 12) { trou(0, y); trou(200, y); }
-
   // Dépôt : déduit de l'adresse GitHub Pages (utilisateur.github.io/depot/),
   // sinon valeurs par défaut. Le site suit ainsi le dépôt s'il est renommé.
   let proprietaire = "RottweilerT", depot = "LTC-Traitement-Images";

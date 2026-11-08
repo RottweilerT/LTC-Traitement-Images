@@ -71,6 +71,16 @@ if errorlevel 1 (
 ".venv\Scripts\python.exe" run_pipeline.py --version
 
 echo.
+echo Creation du raccourci "Traitement de Timbres" sur le Bureau ...
+set "PROJET=%~dp0"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$d=[Environment]::GetFolderPath('Desktop'); $s=(New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $d 'Traitement de Timbres.lnk')); $s.TargetPath=(Join-Path $env:PROJET 'LANCER_TRAITEMENT.bat'); $s.WorkingDirectory=$env:PROJET; $s.IconLocation=(Join-Path $env:PROJET 'ressources\icone.ico'); $s.Description='Traitement de Timbres'; $s.Save()"
+if errorlevel 1 (
+    echo Le raccourci n'a pas pu etre cree ^(sans consequence^) : lancez LANCER_TRAITEMENT.bat directement.
+) else (
+    echo Raccourci cree. Si vous deplacez ce dossier, relancez INSTALLER.bat pour le mettre a jour.
+)
+
+echo.
 echo ==========================================
 echo Installation terminee.
 echo Lancez maintenant LANCER_TRAITEMENT.bat
