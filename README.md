@@ -1,6 +1,6 @@
 # Traitement d’images — version 1.9.1
 
-Site de téléchargement : https://rottweilert.github.io/Traitement-Images-LTC/
+Site de téléchargement : https://rottweilert.github.io/LTC-Traitement-Images/
 (page dans le dossier `docs/`, publiée par GitHub Pages, toujours à jour).
 
 ## Nouveauté 1.9.0
