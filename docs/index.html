@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Traitement d'images LTC</title>
+<meta name="description" content="Logiciel Windows qui détoure, redresse et encadre automatiquement les timbres et documents scannés sur fond gris.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verre: #DCDED9;        /* vitre du scanner, fond de page */
+    --gris-scan: #2B2E2C;    /* fond gris des scans */
+    --noir-sortie: #050002;  /* fond et marge des fichiers produits */
+    --papier: #F4F3EE;       /* papier du timbre */
+    --encre: #1A1C1A;        /* texte */
+    --outremer: #233F8F;     /* encre postale : liens et bouton */
+    --discret: #5B5F5A;
+    --filet: #BFC2BC;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--verre);
+    color: var(--encre);
+    font-family: "Archivo", system-ui, sans-serif;
+    font-variation-settings: "wdth" 100;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
+  a { color: var(--outremer); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--outremer); outline-offset: 3px; }
+
+  .page { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
+
+  /* En-tête : titre + timbre animé */
+  .tete {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 3rem;
+    align-items: center;
+    padding: 4.5rem 0 3.5rem;
+  }
+  h1 {
+    margin: 0 0 1.25rem;
+    font-size: clamp(2.6rem, 6vw, 4.6rem);
+    line-height: 0.95;
+    font-weight: 800;
+    font-variation-settings: "wdth" 125;
+    letter-spacing: -0.01em;
+  }
+  .accroche { font-size: 1.25rem; max-width: 34rem; margin: 0 0 2rem; }
+
+  .telecharger {
+    display: inline-block;
+    background: var(--outremer);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.125rem;
+    padding: 0.95rem 1.6rem;
+    border-radius: 4px;
+  }
+  .telecharger:hover { background: #1A3175; }
+  .version { margin: 0.9rem 0 0; color: var(--discret); font-size: 0.95rem; }
+
+  /* Scène du timbre : gris du scan qui devient noir de sortie */
+  .scene {
+    aspect-ratio: 1 / 1.08;
+    background: var(--gris-scan);
+    display: grid;
+    place-items: center;
+    border-radius: 2px;
+    animation: noircir 1.4s ease-in-out 0.6s forwards;
+  }
+  .scene svg {
+    width: 62%;
+    height: auto;
+    transform: rotate(-5deg);
+    animation: redresser 1.4s cubic-bezier(.5,0,.2,1) 0.6s forwards;
+  }
+  @keyframes redresser { to { transform: rotate(0deg); } }
+  @keyframes noircir { to { background: var(--noir-sortie); } }
+  .legende { margin: 0.6rem 0 0; font-size: 0.9rem; color: var(--discret); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scene { animation: none; background: var(--noir-sortie); }
+    .scene svg { animation: none; transform: none; }
+  }
+
+  /* Sections */
+  section { border-top: 1px solid var(--filet); padding: 3rem 0; }
+  h2 {
+    margin: 0 0 1.5rem;
+    font-size: 1.75rem;
+    line-height: 1.15;
+    font-weight: 750;
+    font-variation-settings: "wdth" 112;
+  }
+  .colonnes { display: grid; grid-template-columns: 16rem minmax(0, 1fr); gap: 2rem; }
+  .colonnes h2 { margin: 0; }
+  .texte { max-width: 40rem; }
+  .texte p { margin: 0 0 1rem; }
+
+  ol.etapes { list-style: none; margin: 0; padding: 0; counter-reset: etape; max-width: 40rem; }
+  ol.etapes li {
+    counter-increment: etape;
+    display: grid;
+    grid-template-columns: 2.6rem minmax(0, 1fr);
+    gap: 0.5rem;
+    padding: 0 0 1.4rem;
+  }
+  ol.etapes li::before {
+    content: counter(etape);
+    font-weight: 800;
+    font-variation-settings: "wdth" 125;
+    font-size: 1.6rem;
+    line-height: 1.1;
+    color: var(--outremer);
+  }
+  ol.etapes strong { display: block; }
+  code {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 0.92em;
+    background: #ECEDEA;
+    padding: 0.08em 0.35em;
+    border-radius: 3px;
+  }
+
+  ul.fait { margin: 0; padding: 0 0 0 1.1rem; max-width: 40rem; }
+  ul.fait li { margin: 0 0 0.7rem; }
+
+  ul.journal { list-style: none; margin: 0; padding: 0; max-width: 44rem; }
+  ul.journal li {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--filet);
+  }
+  ul.journal time { color: var(--discret); font-variant-numeric: tabular-nums; }
+  .vide { color: var(--discret); }
+
+  footer { border-top: 1px solid var(--filet); padding: 2rem 0 3rem; color: var(--discret); font-size: 0.95rem; }
+
+  @media (max-width: 760px) {
+    .tete { grid-template-columns: 1fr; gap: 2rem; padding: 2.5rem 0 2rem; }
+    .colonnes { grid-template-columns: 1fr; gap: 1.25rem; }
+    ul.journal li { grid-template-columns: 1fr; gap: 0.1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="tete">
+    <div>
+      <h1>Traitement d'images LTC</h1>
+      <p class="accroche">Déposez vos scans de timbres et de documents : le logiciel les détoure, les redresse et les place sur un fond noir avec une marge de 1&nbsp;mm, sans toucher à leurs couleurs.</p>
+      <a class="telecharger" id="lien-zip" href="https://github.com/RottweilerT/Traitement-Images-LTC/archive/refs/heads/main.zip">Télécharger le logiciel (.zip)</a>
+      <p class="version" id="version">Toujours la dernière version, pour Windows.</p>
+    </div>
+    <figure style="margin:0">
+      <div class="scene" role="img" aria-label="Un timbre posé de travers sur le fond gris d'un scan est redressé puis placé sur un fond noir">
+        <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <mask id="dentelure">
+              <rect x="0" y="0" width="200" height="240" fill="#fff"/>
+              <g fill="#000" id="trous"></g>
+            </mask>
+          </defs>
+          <rect x="0" y="0" width="200" height="240" fill="#F4F3EE" mask="url(#dentelure)"/>
+          <rect x="18" y="18" width="164" height="204" fill="#233F8F"/>
+          <circle cx="100" cy="98" r="34" fill="none" stroke="#F4F3EE" stroke-width="5"/>
+          <path d="M18 168 C 60 140, 92 182, 140 152 S 182 150, 182 150 L182 222 L18 222 Z" fill="#1A3175"/>
+          <text x="30" y="210" fill="#F4F3EE" font-family="Archivo, sans-serif" font-weight="800" font-size="26" style="font-variation-settings:'wdth' 125">1 mm</text>
+          <text x="170" y="44" fill="#F4F3EE" font-family="Archivo, sans-serif" font-weight="700" font-size="13" text-anchor="end">LTC</text>
+        </svg>
+      </div>
+      <figcaption class="legende">Ce que fait le logiciel, scan par scan.</figcaption>
+    </figure>
+  </header>
+
+  <section class="colonnes" aria-labelledby="t-installer">
+    <h2 id="t-installer">Installer</h2>
+    <ol class="etapes">
+      <li><div><strong>Installer Python 3.12</strong>Depuis <a href="https://www.python.org/downloads/">python.org</a>, version 3.12, « Windows installer 64-bit ». À faire une seule fois par ordinateur.</div></li>
+      <li><div><strong>Décompresser le zip</strong>Clic droit sur le fichier téléchargé, puis « Extraire tout ».</div></li>
+      <li><div><strong>Lancer <code>INSTALLER.bat</code></strong>Double-clic. Il prépare le logiciel et ses bibliothèques. Attendez le message « Installation terminée ».</div></li>
+      <li><div><strong>Traiter vos scans</strong>Copiez vos fichiers TIFF dans le dossier <code>input</code>, puis double-cliquez sur <code>LANCER_TRAITEMENT.bat</code>. Les résultats arrivent dans <code>output</code>.</div></li>
+    </ol>
+  </section>
+
+  <section class="colonnes" aria-labelledby="t-fait">
+    <h2 id="t-fait">Ce qu'il fait</h2>
+    <ul class="fait">
+      <li>Retire le fond gris du scanner autour de chaque élément, au pixel près, dentelures comprises.</li>
+      <li>Sépare les éléments posés côte à côte sur un même scan : un fichier par élément.</li>
+      <li>Redresse chaque élément sans le déformer ni créer de lignes de décalage.</li>
+      <li>Ajoute une marge noire de 1&nbsp;mm, calculée d'après la résolution du scan.</li>
+      <li>Conserve les couleurs d'origine et vérifie chaque fichier produit ; les cas douteux sont signalés pour une reprise à la main.</li>
+    </ul>
+  </section>
+
+  <section class="colonnes" aria-labelledby="t-journal">
+    <h2 id="t-journal">Dernières modifications</h2>
+    <ul class="journal" id="journal">
+      <li class="vide">Chargement des modifications…</li>
+    </ul>
+  </section>
+
+  <footer>
+    Le code source est sur <a id="lien-github" href="https://github.com/RottweilerT/Traitement-Images-LTC">GitHub</a>. Le téléchargement contient toujours la version la plus récente.
+  </footer>
+</div>
+
+<script>
+(() => {
+  // Dentelure du timbre : trous ronds réguliers sur les quatre bords.
+  const trous = document.getElementById("trous");
+  const ns = "http://www.w3.org/2000/svg";
+  const trou = (x, y) => { const c = document.createElementNS(ns, "circle"); c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", 4.2); trous.appendChild(c); };
+  for (let x = 0; x <= 200; x += 12.5) { trou(x, 0); trou(x, 240); }
+  for (let y = 0; y <= 240; y += 12) { trou(0, y); trou(200, y); }
+
+  // Dépôt : déduit de l'adresse GitHub Pages (utilisateur.github.io/depot/),
+  // sinon valeurs par défaut. Le site suit ainsi le dépôt s'il est renommé.
+  let proprietaire = "RottweilerT", depot = "Traitement-Images-LTC";
+  const hote = location.hostname;
+  if (hote.endsWith(".github.io")) {
+    proprietaire = hote.replace(".github.io", "");
+    const premier = location.pathname.split("/").filter(Boolean)[0];
+    if (premier) depot = premier;
+  }
+  const page = `https://github.com/${proprietaire}/${depot}`;
+  document.getElementById("lien-zip").href = `${page}/archive/refs/heads/main.zip`;
+  document.getElementById("lien-github").href = page;
+
+  const infos = { version: null, date: null };
+  const afficherVersion = () => {
+    const parts = [infos.version ? `Version ${infos.version}, pour Windows.` : "Toujours la dernière version, pour Windows."];
+    if (infos.date) parts.push(`Mise à jour le ${infos.date}.`);
+    document.getElementById("version").textContent = parts.join(" ");
+  };
+  const dateFr = iso => new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+
+  // Version et date de la dernière mise à jour.
+  fetch(`https://raw.githubusercontent.com/${proprietaire}/${depot}/main/image_pipeline/__init__.py`)
+    .then(r => r.ok ? r.text() : Promise.reject())
+    .then(t => {
+      const m = t.match(/__version__\s*=\s*"([^"]+)"/);
+      if (m) { infos.version = m[1]; afficherVersion(); }
+    })
+    .catch(() => {});
+
+  // Journal des modifications : les derniers commits du dépôt.
+  const journal = document.getElementById("journal");
+  fetch(`https://api.github.com/repos/${proprietaire}/${depot}/commits?per_page=8`)
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(commits => {
+      journal.innerHTML = "";
+      for (const c of commits) {
+        const li = document.createElement("li");
+        const t = document.createElement("time");
+        t.dateTime = c.commit.author.date;
+        t.textContent = dateFr(c.commit.author.date);
+        const msg = document.createElement("span");
+        const titre = c.commit.message.split("\n")[0];
+        msg.textContent = titre.charAt(0).toUpperCase() + titre.slice(1);
+        li.append(t, msg);
+        journal.appendChild(li);
+      }
+      if (commits[0]) { infos.date = dateFr(commits[0].commit.author.date); afficherVersion(); }
+    })
+    .catch(() => {
+      journal.innerHTML = "";
+      const li = document.createElement("li");
+      li.className = "vide";
+      li.innerHTML = `La liste n'a pas pu être chargée. Elle reste consultable sur <a href="${page}/commits/main">GitHub</a>.`;
+      journal.appendChild(li);
+    });
+})();
+</script>
+</body>
+</html>

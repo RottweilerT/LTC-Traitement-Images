@@ -1,5 +1,8 @@
 # Traitement d’images — version 1.9.1
 
+Site de téléchargement : https://rottweilert.github.io/Traitement-Images-LTC/
+(page dans le dossier `docs/`, publiée par GitHub Pages, toujours à jour).
+
 ## Nouveauté 1.9.0
 
 La bordure foncée autour de chaque sujet passe de **2 mm à 1 mm**
