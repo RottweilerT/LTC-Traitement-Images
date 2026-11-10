@@ -239,7 +239,7 @@ indépendamment du traitement :
 3. les JPEG apparaissent dans `CONVERSION_JPEG\JPEG_CONVERTIS`, rangés dans les
    mêmes dossiers.
 
-Qualité 95 sans sous-échantillonnage des couleurs (4:4:4), couleurs converties en
+Qualité 100 sans sous-échantillonnage des couleurs (4:4:4), couleurs converties en
 sRGB si le TIFF porte un profil, résolution conservée. Un TIFF de plusieurs
 pages donne un JPEG par page (`nom-1.jpg`, `nom-2.jpg`…). Les TIFF ne sont
 jamais modifiés et un JPEG déjà présent n'est jamais écrasé.

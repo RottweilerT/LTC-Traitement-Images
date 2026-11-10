@@ -50,7 +50,7 @@ class JpegConversionTests(unittest.TestCase):
                 self.assertEqual(tuple(round(v) for v in image.info["dpi"]), (600, 600))
                 self.assertIn("icc_profile", image.info)
                 pixels = np.asarray(image).astype(int)
-            # Qualité 95 en 4:4:4 : couleurs fidèles à quelques niveaux près.
+            # Qualité 100 en 4:4:4 : couleurs fidèles à quelques niveaux près.
             self.assertLess(np.abs(pixels[20, 10] - (200, 40, 60)).max(), 6)
             self.assertLess(np.abs(pixels[20, 50] - (5, 0, 2)).max(), 6)
             self.assertFalse((target / "Lot_001" / "notes.jpg").exists())

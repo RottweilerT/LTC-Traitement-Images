@@ -25,7 +25,7 @@ from PIL import Image, ImageCms, ImageOps, UnidentifiedImageError
 from .io_utils import _convert_frame_to_srgb
 
 TIFF_EXTENSIONS = {".tif", ".tiff"}
-DEFAULT_QUALITY = 95
+DEFAULT_QUALITY = 100
 _SRGB_PROFILE = ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes()
 
 
