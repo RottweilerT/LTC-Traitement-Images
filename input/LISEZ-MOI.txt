@@ -1,0 +1,3 @@
+﻿Déposez ici les dossiers de scans TIFF à traiter (un dossier par lot).
+Double-cliquez ensuite sur LANCER_TRAITEMENT.bat : les résultats apparaissent
+dans le dossier output, un dossier « nom-ps » par lot.

@@ -1,0 +1,2 @@
+﻿Les JPEG convertis apparaissent ici, rangés dans les mêmes dossiers que les TIFF
+de TIF_A_CONVERTIR. Un JPEG déjà présent n'est jamais écrasé.

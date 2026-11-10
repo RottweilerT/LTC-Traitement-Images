@@ -116,6 +116,7 @@ Traitement-Images-LTC/
 ├── INSTALLER.bat           installation (une seule fois)
 ├── LANCER_TRAITEMENT.bat   traitement du dossier input
 ├── BILAN_MANUEL.bat        bilan du contrôle manuel
+├── CONVERSION_JPEG/        conversion de dossiers TIFF en JPEG
 ├── requirements.txt        dépendances
 └── run_pipeline.py         lancement en ligne de commande
 ```
@@ -226,6 +227,22 @@ Exemple avec des dossiers personnalisés :
 python run_pipeline.py "C:\MesTIFF" -o "C:\MesResultats" --margin-mm 1
 ```
 
+
+## Conversion de TIFF en JPEG
+
+Le dossier `CONVERSION_JPEG` convertit des dossiers de TIFF en JPEG,
+indépendamment du traitement :
+
+1. déposer les dossiers de TIFF (ou les TIFF directement) dans
+   `CONVERSION_JPEG\TIF_A_CONVERTIR` ;
+2. double-cliquer sur `CONVERSION_JPEG\CONVERTIR_EN_JPEG.bat` ;
+3. les JPEG apparaissent dans `CONVERSION_JPEG\JPEG_CONVERTIS`, rangés dans les
+   mêmes dossiers.
+
+Qualité 95 sans sous-échantillonnage des couleurs (4:4:4), couleurs converties en
+sRGB si le TIFF porte un profil, résolution conservée. Un TIFF de plusieurs
+pages donne un JPEG par page (`nom-1.jpg`, `nom-2.jpg`…). Les TIFF ne sont
+jamais modifiés et un JPEG déjà présent n'est jamais écrasé.
 
 ## Contrôle manuel après traitement
 

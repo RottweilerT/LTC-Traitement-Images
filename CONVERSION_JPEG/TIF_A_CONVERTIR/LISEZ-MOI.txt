@@ -1,0 +1,3 @@
+﻿Déposez ici les dossiers de fichiers TIFF à convertir (ou les TIFF directement).
+Double-cliquez ensuite sur CONVERTIR_EN_JPEG.bat : les JPEG apparaissent dans
+JPEG_CONVERTIS, rangés dans les mêmes dossiers. Les TIFF ne sont pas modifiés.
