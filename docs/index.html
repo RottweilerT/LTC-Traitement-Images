@@ -69,6 +69,10 @@
   }
   .telecharger:hover { background: #A00C15; }
   .version { margin: 0.9rem 0 0; color: var(--discret); font-size: 0.95rem; }
+  .suite { margin: 0.6rem 0 0; font-weight: 600; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  section h2 { scroll-margin-top: 1rem; }
 
   .logo { margin: 0; justify-self: end; width: 100%; max-width: 26rem; }
   .logo img {
@@ -133,7 +137,8 @@
 
   @media (max-width: 760px) {
     .tete { grid-template-columns: 1fr; gap: 2rem; padding: 2.5rem 0 2rem; }
-    .logo { justify-self: center; max-width: 18rem; }
+    .logo { justify-self: center; max-width: 14rem; }
+    .telecharger { display: block; text-align: center; }
     .colonnes { grid-template-columns: 1fr; gap: 1.25rem; }
     ul.journal li { grid-template-columns: 1fr; gap: 0.1rem; }
   }
@@ -148,6 +153,7 @@
       <p class="accroche">Déposez vos scans de timbres et de documents : le logiciel les détoure, les redresse et les place sur un fond noir avec une marge de 1&nbsp;mm, sans toucher à leurs couleurs.</p>
       <a class="telecharger" id="lien-zip" href="https://github.com/RottweilerT/LTC-Traitement-Images/archive/refs/heads/main.zip">Télécharger le logiciel (.zip)</a>
       <p class="version" id="version">Toujours la dernière version, pour Windows.</p>
+      <p class="suite"><a href="#t-installer">Comment l'installer ↓</a></p>
     </div>
     <figure class="logo">
       <img src="logo.webp" width="512" height="512" alt="Logo LTC Traitement Images : un timbre illustré d'un rottweiler dans un cadre de recadrage, avec les outils recadrer, redimensionner, image et réglages, et une loupe sur la dentelure">
@@ -178,7 +184,7 @@
   <section class="colonnes" aria-labelledby="t-journal">
     <h2 id="t-journal">Dernières modifications</h2>
     <ul class="journal" id="journal">
-      <li class="vide">Chargement des modifications…</li>
+      <li class="vide"><span>Chargement des modifications…</span></li>
     </ul>
   </section>
 
@@ -247,7 +253,7 @@
       journal.innerHTML = "";
       const li = document.createElement("li");
       li.className = "vide";
-      li.innerHTML = `La liste n'a pas pu être chargée. Elle reste consultable sur <a href="${page}/commits/main">GitHub</a>.`;
+      li.innerHTML = `<span>La liste n'a pas pu être chargée. Elle reste consultable sur <a href="${page}/commits/main">GitHub</a>.</span>`;
       journal.appendChild(li);
     });
 })();
