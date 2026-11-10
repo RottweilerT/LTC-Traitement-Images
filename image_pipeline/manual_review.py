@@ -196,29 +196,25 @@ def _copy_without_overwrite(source: Path, target: Path) -> str:
     return "created"
 
 
-def _manual_name_for_missing_output(output_name: str, source: Path) -> str:
-    return f"{Path(output_name).stem}{source.suffix}"
-
-
-def _manual_name_for_error(
+def _manual_name_for_source(
     source: Path,
-    error: dict[str, Any],
-    *,
-    single_plain_name: bool,
-    ordinal: int,
+    source_key: str,
+    used: dict[str, str],
 ) -> str:
-    if single_plain_name:
-        return source.name
-    frame = error.get("frame_index")
-    subject = error.get("subject_index")
-    parts = [source.stem, "echec"]
-    if frame is not None:
-        parts.append(f"f{frame}")
-    if subject is not None:
-        parts.append(f"s{subject}")
-    if frame is None and subject is None:
-        parts.append(str(ordinal))
-    return "-".join(parts) + source.suffix
+    """Nom de l'unique copie d'une source : son nom d'origine.
+
+    Si deux sources différentes du même lot portent le même nom (sous-dossiers
+    distincts), la seconde reçoit un suffixe -2, -3… pour ne jamais confondre
+    deux originaux.
+    """
+
+    name = source.name
+    index = 2
+    while used.get(name, source_key) != source_key:
+        name = f"{source.stem}-{index}{source.suffix}"
+        index += 1
+    used[name] = source_key
+    return name
 
 
 def run_manual_review(config: PipelineConfig) -> dict[str, int]:
@@ -258,6 +254,7 @@ def run_manual_review(config: PipelineConfig) -> dict[str, int]:
         deleted_lines: list[str] = []
         failure_lines: list[str] = []
         qc_lines: list[str] = []
+        used_names: dict[str, str] = {}
 
         sources = manifest.get("sources", {})
         for source_key in sorted(sources, key=str.casefold):
@@ -272,23 +269,40 @@ def run_manual_review(config: PipelineConfig) -> dict[str, int]:
                 for record in outputs
                 if not (lot_dir / str(record.get("name", ""))).is_file()
             ]
-            for record in missing:
-                totals["missing_outputs"] += 1
-                output_name = str(record.get("name", "sortie_inconnue"))
+            effective_errors = errors[:]
+            if not outputs and not errors:
+                effective_errors.append(
+                    {
+                        "frame_index": None,
+                        "subject_index": None,
+                        "error_type": "NoOutput",
+                        "message": "Aucune sortie produite par le traitement automatique.",
+                    }
+                )
+            totals["missing_outputs"] += len(missing)
+            totals["automatic_failures"] += len(effective_errors)
+
+            # Une seule copie de l'original par source, même si plusieurs
+            # sorties issues de ce scan ont été supprimées ou refusées.
+            copy_label = "COPIE IMPOSSIBLE (source introuvable)"
+            if missing or effective_errors:
                 if source_exists:
-                    manual_name = _manual_name_for_missing_output(output_name, source)
-                    target = manual_dir / manual_name
-                    state = _copy_without_overwrite(source, target)
+                    manual_name = _manual_name_for_source(source, source_key, used_names)
+                    state = _copy_without_overwrite(source, manual_dir / manual_name)
                     totals[f"copies_{state}"] += 1
-                    deleted_lines.append(
-                        f"- {output_name} | source: {source_key} | copie: "
-                        f"{MANUAL_DIRNAME}/{manual_name}"
-                    )
+                    copy_label = f"copie: {MANUAL_DIRNAME}/{manual_name}"
                 else:
                     totals["sources_missing"] += 1
-                    deleted_lines.append(
-                        f"- {output_name} | source introuvable: {source_key} | COPIE IMPOSSIBLE"
-                    )
+
+            for record in missing:
+                output_name = str(record.get("name", "sortie_inconnue"))
+                deleted_lines.append(f"- {output_name} | source: {source_key} | {copy_label}")
+
+            for error in effective_errors:
+                message = str(error.get("message", "Erreur automatique sans détail."))
+                failure_lines.append(
+                    f"- source: {source_key} | raison: {message} | {copy_label}"
+                )
 
             present_qc_failures = [
                 record
@@ -301,41 +315,6 @@ def run_manual_review(config: PipelineConfig) -> dict[str, int]:
                 problems = record.get("qc_problems") or []
                 detail = "; ".join(str(item) for item in problems) or "contrôle qualité non conforme"
                 qc_lines.append(f"- {record.get('name')} | source: {source_key} | {detail}")
-
-            effective_errors = errors[:]
-            if not outputs and not errors:
-                effective_errors.append(
-                    {
-                        "frame_index": None,
-                        "subject_index": None,
-                        "error_type": "NoOutput",
-                        "message": "Aucune sortie produite par le traitement automatique.",
-                    }
-                )
-
-            for ordinal, error in enumerate(effective_errors, start=1):
-                totals["automatic_failures"] += 1
-                message = str(error.get("message", "Erreur automatique sans détail."))
-                if source_exists:
-                    plain_name = len(effective_errors) == 1 and not outputs
-                    manual_name = _manual_name_for_error(
-                        source,
-                        error,
-                        single_plain_name=plain_name,
-                        ordinal=ordinal,
-                    )
-                    target = manual_dir / manual_name
-                    state = _copy_without_overwrite(source, target)
-                    totals[f"copies_{state}"] += 1
-                    failure_lines.append(
-                        f"- source: {source_key} | raison: {message} | copie: "
-                        f"{MANUAL_DIRNAME}/{manual_name}"
-                    )
-                else:
-                    totals["sources_missing"] += 1
-                    failure_lines.append(
-                        f"- source introuvable: {source_key} | raison: {message} | COPIE IMPOSSIBLE"
-                    )
 
         report_lines = [
             "CONTROLE MANUEL - TRAITEMENT IMAGES LTC",
@@ -368,7 +347,8 @@ def run_manual_review(config: PipelineConfig) -> dict[str, int]:
                 "RAPPEL",
                 "------",
                 "Les fichiers placés dans A_TRAITER_MANUELLEMENT sont des copies",
-                "binaires des originaux. Les fichiers du dossier input ne sont jamais modifiés.",
+                "binaires des originaux, une seule par scan d'origine. Les fichiers",
+                "du dossier input ne sont jamais modifiés.",
                 "",
             ]
         )

@@ -25,7 +25,7 @@ class ManualReviewTests(unittest.TestCase):
             output_dir=root / "output",
         )
 
-    def test_deleted_outputs_create_one_original_copy_per_missing_output(self) -> None:
+    def test_deleted_outputs_of_one_scan_create_a_single_original_copy(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             config = self._config(root)
@@ -53,10 +53,11 @@ class ManualReviewTests(unittest.TestCase):
             summary = run_manual_review(config)
 
             manual_dir = lot_output / MANUAL_DIRNAME
-            self.assertEqual((manual_dir / "001-2.tif").read_bytes(), source.read_bytes())
-            self.assertEqual((manual_dir / "001-4.tif").read_bytes(), source.read_bytes())
+            # Deux sorties supprimées, mais une seule copie de l'original.
+            self.assertEqual(sorted(p.name for p in manual_dir.iterdir()), ["001.tif"])
+            self.assertEqual((manual_dir / "001.tif").read_bytes(), source.read_bytes())
             self.assertEqual(summary["missing_outputs"], 2)
-            self.assertEqual(summary["copies_created"], 2)
+            self.assertEqual(summary["copies_created"], 1)
             report = (lot_output / REPORT_FILENAME).read_text(encoding="utf-8")
             self.assertIn("001-2.tif", report)
             self.assertIn("001-4.tif", report)
@@ -86,7 +87,7 @@ class ManualReviewTests(unittest.TestCase):
             report = (lot_output / REPORT_FILENAME).read_text(encoding="utf-8")
             self.assertIn("Contour trop incertain", report)
 
-    def test_partial_automatic_failures_create_multiple_source_copies(self) -> None:
+    def test_partial_automatic_failures_create_a_single_source_copy(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             config = self._config(root)
@@ -126,15 +127,13 @@ class ManualReviewTests(unittest.TestCase):
             summary = run_manual_review(config)
 
             manual_dir = lot_output / MANUAL_DIRNAME
-            self.assertEqual(
-                (manual_dir / "010-echec-f1-s2.tif").read_bytes(),
-                source.read_bytes(),
-            )
-            self.assertEqual(
-                (manual_dir / "010-echec-f1-s3.tif").read_bytes(),
-                source.read_bytes(),
-            )
+            self.assertEqual(sorted(p.name for p in manual_dir.iterdir()), ["010.tif"])
+            self.assertEqual((manual_dir / "010.tif").read_bytes(), source.read_bytes())
             self.assertEqual(summary["automatic_failures"], 2)
+            self.assertEqual(summary["copies_created"], 1)
+            report = (lot_output / REPORT_FILENAME).read_text(encoding="utf-8")
+            self.assertIn("Sujet 2 refusé", report)
+            self.assertIn("Sujet 3 refusé", report)
 
     def test_existing_manual_copy_is_never_overwritten(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -158,7 +157,7 @@ class ManualReviewTests(unittest.TestCase):
             )
             manual_dir = lot_output / MANUAL_DIRNAME
             manual_dir.mkdir(parents=True, exist_ok=True)
-            manual_file = manual_dir / "020-2.tif"
+            manual_file = manual_dir / "020.tif"
             manual_file.write_bytes(b"TRAVAIL-MANUEL-A-PRESERVER")
 
             summary = run_manual_review(config)
@@ -196,6 +195,58 @@ class ManualReviewTests(unittest.TestCase):
             report = (lot_output / REPORT_FILENAME).read_text(encoding="utf-8")
             self.assertIn("angle résiduel trop important", report)
             self.assertTrue((lot_output / MANIFEST_FILENAME).exists())
+
+    def test_deleted_output_and_failure_of_one_scan_share_one_copy(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = self._config(root)
+            source = config.input_dir / "Lot_006" / "040.tif"
+            source.parent.mkdir(parents=True)
+            source.write_bytes(b"ORIGINAL-040")
+            lot_output = config.output_dir / "Lot_006-ps"
+            lot_config = replace(config, output_dir=lot_output)
+
+            record_source_start(lot_config, source)
+            record_output(
+                lot_config, source, lot_output / "040-1.tif",
+                frame_index=1, subject_index=1, qc_passed=True, qc_problems=[],
+            )
+            record_error(
+                lot_config, source, RuntimeError("Sujet 2 refusé"),
+                frame_index=1, subject_index=2,
+            )
+            lot_output.mkdir(parents=True, exist_ok=True)
+
+            summary = run_manual_review(config)
+
+            manual_dir = lot_output / MANUAL_DIRNAME
+            self.assertEqual(sorted(p.name for p in manual_dir.iterdir()), ["040.tif"])
+            self.assertEqual(summary["copies_created"], 1)
+            self.assertEqual(summary["missing_outputs"], 1)
+            self.assertEqual(summary["automatic_failures"], 1)
+
+    def test_same_name_in_two_subfolders_gives_two_distinct_copies(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = self._config(root)
+            lot_output = config.output_dir / "Lot_007-ps"
+            lot_config = replace(config, output_dir=lot_output)
+            sources = []
+            for sub in ("a", "b"):
+                source = config.input_dir / "Lot_007" / sub / "050.tif"
+                source.parent.mkdir(parents=True)
+                source.write_bytes(f"ORIGINAL-{sub}".encode())
+                sources.append(source)
+                record_source_start(lot_config, source)
+                record_error(lot_config, source, RuntimeError("refus"))
+
+            summary = run_manual_review(config)
+
+            manual_dir = lot_output / MANUAL_DIRNAME
+            self.assertEqual(sorted(p.name for p in manual_dir.iterdir()), ["050-2.tif", "050.tif"])
+            contents = {(manual_dir / n).read_bytes() for n in ("050.tif", "050-2.tif")}
+            self.assertEqual(contents, {b"ORIGINAL-a", b"ORIGINAL-b"})
+            self.assertEqual(summary["copies_created"], 2)
 
 
 if __name__ == "__main__":

@@ -250,11 +250,11 @@ output/Lot_001-ps/
 └── CONTROLE_MANUEL.txt
 ```
 
-Pour chaque sortie supprimée, `A_TRAITER_MANUELLEMENT` reçoit une copie binaire
-intégrale du TIFF source. Si deux sorties provenant du même TIFF ont été
-supprimées, deux copies du TIFF original sont préparées, avec les noms des
-sorties supprimées. Les échecs/refus automatiques sont également préparés pour
-reprise manuelle et leur raison est inscrite dans `CONTROLE_MANUEL.txt`.
+Pour chaque scan dont au moins une sortie a été supprimée ou refusée,
+`A_TRAITER_MANUELLEMENT` reçoit **une seule** copie binaire intégrale du TIFF
+d'origine, sous son nom d'origine — même si plusieurs sorties issues de ce scan
+ont été supprimées. `CONTROLE_MANUEL.txt` liste chaque sortie supprimée et
+chaque refus automatique, avec sa raison et la copie correspondante.
 
 Les fichiers du dossier `input` ne sont jamais déplacés, renommés, écrasés ou
 modifiés par cette fonction. Une copie déjà présente dans
