@@ -50,7 +50,7 @@ if exist ".venv\Scripts\python.exe" (
 
 if not exist ".venv\Scripts\python.exe" (
     echo Creation de l'environnement .venv ...
-    "%PY312%" -m venv .venv
+    %PY312% -m venv .venv
     if errorlevel 1 (
         echo ERREUR : impossible de creer l'environnement .venv
         pause
@@ -103,16 +103,16 @@ rem Sous-programmes
 rem ===========================================================================
 
 :trouver_python
-rem Cherche un Python 3.12 qui fonctionne : lanceur py, puis emplacements
-rem d'installation habituels (utilisable sans redemarrer la session).
+rem Cherche un Python 3.12 qui fonctionne. PY312 contient une commande prete a
+rem l'emploi : "py -3.12", ou le chemin complet entre guillemets. Le chemin
+rem n'est jamais relu depuis la sortie d'un programme : la console Windows y
+rem abime les accents d'un nom de compte (ex. Stephanie avec un accent).
 set "PY312="
-for /f "delims=" %%P in ('py -3.12 -c "import sys; print(sys.executable)" 2^>nul') do set "PY312=%%P"
+py -3.12 -c "import sys" >nul 2>&1 && set "PY312=py -3.12"
 if defined PY312 exit /b 0
-for %%C in ("%LOCALAPPDATA%\Programs\Python\Python312\python.exe" "%ProgramFiles%\Python312\python.exe") do (
-    if not defined PY312 if exist %%C (
-        %%C -c "import sys" >nul 2>&1 && set "PY312=%%~C"
-    )
-)
+if exist "%LOCALAPPDATA%\Programs\Python\Python312\python.exe" "%LOCALAPPDATA%\Programs\Python\Python312\python.exe" -c "import sys" >nul 2>&1 && set PY312="%LOCALAPPDATA%\Programs\Python\Python312\python.exe"
+if defined PY312 exit /b 0
+if exist "%ProgramFiles%\Python312\python.exe" "%ProgramFiles%\Python312\python.exe" -c "import sys" >nul 2>&1 && set PY312="%ProgramFiles%\Python312\python.exe"
 exit /b 0
 
 :installer_python
