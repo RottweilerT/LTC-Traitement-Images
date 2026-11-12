@@ -131,10 +131,13 @@ Il crée aussi sur le Bureau un raccourci **« LTC Traitement Images »**, avec 
 logo, qui lance le traitement. Si le dossier du logiciel est déplacé, relancer
 `INSTALLER.bat` met le raccourci à jour.
 
-Il crée dans le dossier du projet un environnement Python 3.12 (`.venv`) et y
-installe NumPy, Pillow, OpenCV et SciPy. Python 3.12 doit être installé
-(https://www.python.org/downloads/) : dans la première fenêtre de son installation,
-cocher **« Add python.exe to PATH »** avant « Install Now ». Python 3.14 n'est volontairement pas
+Si Python 3.12 n'est pas installé, il l'installe automatiquement (winget, sinon
+installateur officiel de python.org en mode silencieux, pour l'utilisateur
+courant, avec « Add python.exe to PATH »). Il crée ensuite dans le dossier du
+projet un environnement Python 3.12 (`.venv`) et y installe NumPy, Pillow, OpenCV
+et SciPy. Si l'installation automatique échoue, installer Python 3.12 depuis
+https://www.python.org/downloads/ en cochant **« Add python.exe to PATH »** dans
+la première fenêtre, puis relancer `INSTALLER.bat`. Python 3.14 n'est volontairement pas
 utilisé : le contrôle intelligent des applications de Windows y bloque une
 bibliothèque de SciPy.
 
