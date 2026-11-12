@@ -133,7 +133,8 @@ logo, qui lance le traitement. Si le dossier du logiciel est déplacé, relancer
 
 Il crée dans le dossier du projet un environnement Python 3.12 (`.venv`) et y
 installe NumPy, Pillow, OpenCV et SciPy. Python 3.12 doit être installé
-(https://www.python.org/downloads/). Python 3.14 n'est volontairement pas
+(https://www.python.org/downloads/) : dans la première fenêtre de son installation,
+cocher **« Add python.exe to PATH »** avant « Install Now ». Python 3.14 n'est volontairement pas
 utilisé : le contrôle intelligent des applications de Windows y bloque une
 bibliothèque de SciPy.
 
